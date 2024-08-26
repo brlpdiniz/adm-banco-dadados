@@ -1,1 +1,1 @@
-# adm-banco-dadados
+# adm-banco-de-dados
