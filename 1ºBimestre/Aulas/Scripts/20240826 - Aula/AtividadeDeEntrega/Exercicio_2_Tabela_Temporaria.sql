@@ -1,0 +1,3 @@
+/*
+Criar uma tabela temporária local denominada ANIVERSARIANTES, contendo o nome dos clientes e o seu dia de
+nascimento, apenas para clientes que nasceram no mês atual. */select * from ClienteCREATE TABLE #ANIVERSARIANTES(	nome_cliente varchar(50),	dia_nasc int);INSERT INTO #ANIVERSARIANTES(nome_cliente, dia_nasc)SELECT Cli_nome,	DAY(Cli_nascimento) AS dia_nascFROM ClienteWHERE	MONTH(Cli_nascimento) = MONTH(GETDATE());SELECT * FROM #ANIVERSARIANTES;
