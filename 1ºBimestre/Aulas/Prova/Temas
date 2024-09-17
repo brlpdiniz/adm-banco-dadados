@@ -1,0 +1,16 @@
+## Prova Teórica
+
+### Quando usar Procedures?
+- Características
+
+### Qual a diferença entre login e usuário?
+- Login - Dá acesso ao servidor
+- Usuário - Dá acesso ao banco de dados
+
+### Backup
+- Bkp diferencial - pega tudo desde o full
+- Bkp incremental - pega tudo desde o último incremental
+
+### Índices
+- Índices - Qual a diferença entre eles?
+
