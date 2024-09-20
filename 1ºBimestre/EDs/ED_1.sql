@@ -41,7 +41,13 @@
 */
 
 -- 12. Crie uma view que contenha o nome da Loja, endereço, bairro, nome da cidade, nome do estado e região.
+
+
+
 -- 13. Mostre, utilizando a view criada anteriormente, todas as lojas da região sudeste.
+
+
+
 -- 14. Crie um cursor que contenha a data de nascimento e o nome do cliente. A partir desse cursor criar uma tabela temporária onde conste: a data de nascimento, o nome do cliente e a faixa etária do cliente. As faixas etárias serão as seguintes:
     -- “Acima dos 50”. Clientes com mais de 50 anos de idade.
     -- “Entre 35 e 50”. Clientes com idade entre 35 anos até 50 anos.
