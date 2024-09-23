@@ -17,28 +17,28 @@ select
     FORMAT(Cli_nascimento, 'dd/MM/yyyy') as dataNascim
 from
     Cliente
-join 
+    join
     Endereco on Cliente.end_id = Endereco.end_id
-join 
+    join
     Bairro on Endereco.bai_id = Bairro.bai_id
-join 
+    join
     Cidade on Bairro.cid_id = Cidade.cid_id
 order by
     Cli_nascimento desc;
 
 
 -- 2.Mostre o total de produtos por categoria. Exiba o nome da categoria e o total de produtos.
-	-- select * from CategoriaProduto
-	-- select * from Produto
+-- select * from CategoriaProduto
+-- select * from Produto
 
 select
-	cat_descricao as Categoria,
-	count(P.pro_id) as TotalProd
-from 
-	CategoriaProduto CP
-inner join
-	Produto P
-on
+    cat_descricao as Categoria,
+    count(P.pro_id) as TotalProd
+from
+    CategoriaProduto CP
+    inner join
+    Produto P
+    on
 	CP.cat_id = P.cat_id
 group by 
 	cp.cat_descricao
@@ -46,11 +46,11 @@ group by
 
 -- 3.Mostre o total de clientes por ano de nascimento. Ordenar o resultado por ordem crescente do ano de nascimento.
 -- select * from Cliente
-select 
-	year(Cli_nascimento) as anoNasc,
-	count(Cli_id) as totalCli
+select
+    year(Cli_nascimento) as anoNasc,
+    count(Cli_id) as totalCli
 from
-	Cliente
+    Cliente
 group by
 	year(Cli_nascimento)
 order by
@@ -59,19 +59,21 @@ order by
 
 -- 4.Mostre o nome do cliente mais velho.
 -- select * from Cliente
-select 
-	Cli_nome as nomeCliente
+select
+    Cli_nome as nomeCliente
 from
-	Cliente
+    Cliente
 where 
-	Cli_nascimento = (select min(Cli_nascimento) from cliente)
+	Cli_nascimento = (select min(Cli_nascimento)
+from cliente)
+
 
 -- 5.Mostre o nome dos funcionários que contenham “Silva” em qualquer parte do nome.
 -- select * from Funcionario
 select
-	Fun_nome as nomeFuncionario
+    Fun_nome as nomeFuncionario
 from
-	Funcionario
+    Funcionario
 where
 	Fun_nome like '%Silva%'
 
@@ -85,25 +87,29 @@ backup database food to disk = 'C:\Users\Bruno Diniz\Documents\code\git\adm-banc
 alter table Funcionario
 	add fun_tempoServico int default 0
 
+
 -- 8. Verifique que na coluna fun_tempoServico, da tabela funcionario, os valores ficaram como ‘null’, então altere o conteúdo deste campo para zero (0).
 update Funcionario
 	set fun_tempoServico = 0
 	where fun_tempoServico is null
 
+
 -- 9. Vamos atualizar o atributo tempo de servico de cada funcionario. Para isso usaremos a seguinte fórmula: Ano atual menos o ano de nascimento do funcionário menos 30. Exemplo: Funcionário Paulo Soares: Ano atual 2024 – 1985 (ano de nascimento) – 30. O resultado seria 9. Este será o tempo de serviço do funcionário Paulo Soares.
 update Funcionario
 	set fun_tempoServico = year(getdate()) - year(Fun_nascimento) - 30
 
+
 -- 10. Realize um backup somente com as alterações ocorridas no banco de dados deste o último backup completo. Salve esse backup no mesmo arquivo do backup completo. Preservando todos os backups no arquivo.
-backup database food to disk = 'C:\Users\Bruno Diniz\Documents\code\git\adm-banco-dados\1ºBimestre\EDs\food.bak' with differential, noinit, noformat 
+backup database food to disk = 'C:\Users\Bruno Diniz\Documents\code\git\adm-banco-dados\1ºBimestre\EDs\food.bak' with differential, noinit, noformat
+
 
 -- 11. Verifique se a atualização do tempo de serviço funcionou corretamente.
-	-- Embora existam funcionários com o tempo negativo, funcionou
-select 
-	Fun_nome as nomeFuncionario,
-	fun_tempoServico as tempoServiçoFuncionario	
+-- Embora existam funcionários com o tempo negativo, funcionou
+select
+    Fun_nome as nomeFuncionario,
+    fun_tempoServico as tempoServiçoFuncionario
 from
-	Funcionario
+    Funcionario
 
 
 /*
@@ -111,47 +117,49 @@ from
 */
 
 -- 12. Crie uma view que contenha o nome da Loja, endereço, bairro, nome da cidade, nome do estado e região.
- -- select * from loja
- -- select * from endereco
- -- select * from bairro
- -- select * from cidade
- -- select * from estado
- -- select * from regiao
+-- select * from loja
+-- select * from endereco
+-- select * from bairro
+-- select * from cidade
+-- select * from estado
+-- select * from regiao
 
- -- drop view DescriLoja
- -- select * from DescriLoja
+-- drop view DescriLoja
+-- select * from DescriLoja
 
-create view DescriLoja as
-select
-	L.loj_nome as nomeLoja,
-	E.end_descricao as nomeEndereço,
-	B.bai_Descricao as nomeBairro,
-	C.cid_Nome as nomeCidade,
-	Est.est_Nome as nomeEstado,
-	R.Reg_nome as nomeRegiao
-from
-	Loja L
-inner join 
-	Endereco E on L.end_id = E.end_id
-inner join 
-	Bairro B on E.bai_id = B.bai_id
-inner join 
-	Cidade C on B.cid_id = C.cid_id
-inner join 
-	Estado Est on C.est_id = Est.est_id
-inner join 
-	Regiao R on Est.Reg_id = R.Reg_id
+create view DescriLoja
+as
+    select
+        L.loj_nome as nomeLoja,
+        E.end_descricao as nomeEndereço,
+        B.bai_Descricao as nomeBairro,
+        C.cid_Nome as nomeCidade,
+        Est.est_Nome as nomeEstado,
+        R.Reg_nome as nomeRegiao
+    from
+        Loja L
+        inner join
+        Endereco E on L.end_id = E.end_id
+        inner join
+        Bairro B on E.bai_id = B.bai_id
+        inner join
+        Cidade C on B.cid_id = C.cid_id
+        inner join
+        Estado Est on C.est_id = Est.est_id
+        inner join
+        Regiao R on Est.Reg_id = R.Reg_id
 
 
 -- 13. Mostre, utilizando a view criada anteriormente, todas as lojas da região sudeste.
-select * from DescriLoja
+select *
+from DescriLoja
 where nomeRegiao = 'Sudeste'
 
 
 -- 14. Crie um cursor que contenha a data de nascimento e o nome do cliente. A partir desse cursor criar uma tabela temporária onde conste: a data de nascimento, o nome do cliente e a faixa etária do cliente. As faixas etárias serão as seguintes:
-    -- “Acima dos 50”. Clientes com mais de 50 anos de idade.
-    -- “Entre 35 e 50”. Clientes com idade entre 35 anos até 50 anos.
-    -- “Abaixo dos 35”. Clientes com menos de 35 anos de idade.
+-- “Acima dos 50”. Clientes com mais de 50 anos de idade.
+-- “Entre 35 e 50”. Clientes com idade entre 35 anos até 50 anos.
+-- “Abaixo dos 35”. Clientes com menos de 35 anos de idade.
 
 -- select * from Cliente
 
@@ -163,9 +171,10 @@ select
     cli_nome as nomecliente,
     cli_nascimento as nascimento_cliente
 from
-	cliente
+    cliente
 
-create table #faixaetaria (
+create table #faixaetaria
+(
     nomecliente varchar(60),
     nascimento_cliente date,
     faixaetaria varchar(60)
@@ -189,8 +198,10 @@ begin
     else
         set @faixaetaria = 'abaixo dos 35'
 
-    insert into #faixaetaria (nomecliente, nascimento_cliente, faixaetaria)
-    values (@nomecliente, @nascimento_cliente, @faixaetaria)
+    insert into #faixaetaria
+        (nomecliente, nascimento_cliente, faixaetaria)
+    values
+        (@nomecliente, @nascimento_cliente, @faixaetaria)
 
     fetch next from idadecliente into @nomecliente, @nascimento_cliente
 end
@@ -204,37 +215,87 @@ deallocate idadecliente
 */
 
 -- 15. Para a execução deste exercício, será necessário você abrir duas sessões.
-    -- a) Na SESSÃO 1, não finalize a transação.
-        -- SET TRANSACTION ISOLATION LEVEL READ COMMITTED
-        -- BEGIN TRAN
-        -- DELETE FROM continente WHERE con_id = 3;
-    
-    -- b) Na SESSÃO 2, não finalize a transação.
-        -- SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
-        -- BEGIN TRAN
-        -- SELECT * FROM continente WHERE con_id < 6;
+-- a) Na SESSÃO 1, não finalize a transação.
+-- SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+-- BEGIN TRAN
+-- DELETE FROM continente WHERE con_id = 3;
 
-    -- Responda: O que aconteceu na sessão 2, em relação ao item que você alterou na sessão 1? Por que isso aconteceu?
+-- b) Na SESSÃO 2, não finalize a transação.
+-- SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+-- BEGIN TRAN
+-- SELECT * FROM continente WHERE con_id < 6;
 
-    -- c) Finalize a execução das transações anteriores:
-        -- a) Na SESSÃO 1: ROLLBACK
-        -- b) Na SESSÃO 2: ROLLBACK
+-- Responda: O que aconteceu na sessão 2, em relação ao item que você alterou na sessão 1? Por que isso aconteceu?
 
-	/*
+-- c) Finalize a execução das transações anteriores:
+-- a) Na SESSÃO 1: ROLLBACK
+-- b) Na SESSÃO 2: ROLLBACK
+
+/*
 		Na sessão 1 (read commited), a transação é bloqueada e fica aguardando a finalização através de um commit ou rollback
-		Apesar de a sessão 2 estar em read uncommited (o que permitiria ler dados sujos), o SQL Server ainda mantém o bloqueio devido ao delete que está ativo e não finalizado na sessão 1.
+		Apesar de a sessão 2 estar em read uncommited (o que permitiria ler dados sujos), o SQL Server ainda mantém um bloqueio e isolamento, devido ao delete que está ativo e não finalizado na sessão 1.
 	*/
 
-    /* debug */
-    -- alter table Pais nocheck constraint FK_Pais_Continente
-    -- alter table Pais check constraint FK_Pais_Continente
+/* debug */
+-- alter table Pais nocheck constraint FK_Pais_Continente
+-- alter table Pais check constraint FK_Pais_Continente
 
 /*
     Procedures e Triggers
 */
 
 -- 16. Escreva uma procedure que reajustará o preço do produto de acordo com a categoria informada pelo usuário. O usuário informará a categoria a ser alterada e o percentual de reajuste do preço. A procedure deverá verificar se a categoria informada existe. Além disso, a procedure deverá usar o controle de transação.
+-- select * from CategoriaProduto
+-- select * from Produto
+-- exec reajustePreco @categoria = 'Lanche', @reajuste = 10.00;
+
+create procedure reajustePreco
+    @categoria varchar(50),
+    @reajuste float
+as
+begin
+    begin tran
+
+    -- verifica a categoria
+    if exists (select 1
+                from CategoriaProduto
+                where cat_descricao = @categoria
+              )
+    begin
+        -- atualiza o preço
+        update Produto
+        set pro_preco = pro_preco * (1 + (@reajuste / 100)) -- conta padrão de %
+        where cat_id = (select cat_id
+                        from CategoriaProduto
+                        where cat_descricao = @categoria
+                       )
+
+        -- confirma a transação
+        commit tran
+        print 'Preços atualizados!'
+    end
+    else
+    begin
+        -- se a categoria não existir / erro
+        rollback tran
+        print 'Categoria não encontrada!'
+    end
+end
+go
 
 
 -- 17. Desenvolva uma trigger que impeça, não permita, que um produto seja excluído da tabela de produtos.
+-- select * from Produto
+-- insert into Produto (pro_descricao, pro_preco, cat_id)
+-- values ('teste', 10, 1)
+-- delete from Produto where pro_descricao = 'teste'
 
+create trigger antiDeletarProduto
+on Produto
+instead of delete
+as
+begin
+    print 'Não é permitido excluir produtos!'
+    rollback tran
+end
+go
