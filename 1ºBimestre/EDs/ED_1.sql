@@ -221,10 +221,13 @@ deallocate idadecliente
         -- b) Na SESSÃO 2: ROLLBACK
 
 	/*
-		na sessão 2, ao executar a consulta select * from continente where con_id < 6, você verá os dados do registro com con_id = 3 ainda presentes, mesmo que você tenha executado o comando delete from continente where con_id = 3 na sessão 1 e não tenha finalizado essa transação.
-		isso acontece porque na sessão 2, o nível de isolamento de transação está definido como read uncommitted. nesse nível, as tr
+		Na sessão 1 (read commited), a transação é bloqueada e fica aguardando a finalização através de um commit ou rollback
+		Apesar de a sessão 2 estar em read uncommited (o que permitiria ler dados sujos), o SQL Server ainda mantém o bloqueio devido ao delete que está ativo e não finalizado na sessão 1.
 	*/
 
+    /* debug */
+    -- alter table Pais nocheck constraint FK_Pais_Continente
+    -- alter table Pais check constraint FK_Pais_Continente
 
 /*
     Procedures e Triggers
