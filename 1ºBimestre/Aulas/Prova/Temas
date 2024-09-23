@@ -289,4 +289,281 @@
     * -1: O FETCH falhou;
     * -2: O registro trazido foi perdido.
   
+## Índice / Index
+• Estrutura auxiliar que melhora o desempenho das consultas;
+  - Auxilia o SQL a buscar um determinado registro de forma mais eficiente;
+  - Reduz o número de operações de I/O necessárias para localizar os dados solicitados pela consulta;
+  - O tipo de índice mais usado é o chamado B-Tree.
+
+• Colunas que devem ser indexadas:
+  - Usadas nas cláusulas ORDER BY e GROUP BY;
+  - Pesquisadas com frequências como: Chaves primárias (PK) ou Chaves externas (FK) ou colunas usadas frequentemente para unir tabelas;
+  - Pesquisadas para a localização de faixa de valores de chave. (clausulas IN, NOT IN, BETWEEN).
+
+• Colunas que NÃO devem ser indexadas:
+  - Raramente são usadas em uma consulta;
+  - Poucos valores únicos. Por exemplo, um índice em uma coluna com dois valores, Masculino e feminino, retorna uma alta porcentagem de registros.
+  - Tipos de dados text, ntext e image. Não é possível indexar colunas com esses tipos de dados.
+
+• Tipos de índices:
+  - Clustered index
+    * Eficiente para agilizar as operações de localização de registros;
+    * Existe um pequeno “over-head” para operações de atualização, inserção e exclusão;
+    * A ordem física das páginas de dados é a mesma ordem do índice.
+    * A primary Key (PK), automaticamente essa coluna torna-se um índice Clustered;
+    - Recomendado nas seguintes situações:
+      * Na coluna que representa a ordem mais natural da tabela, ou seja, a ordem na qual geralmente os resultados serão apresentados.
+      * Cada tabela só pode ter um índice CLUSTERED.
+      * Colunas usadas com ORDER BY e GROUP BY.
+
+  - Nonclustered index.
+    * Possui uma ordem física diferente da ordem dos dados;
+    * Pode haver mais de um índice não agrupado na tabela, até o máximo de 249 índices;
+    - Recomendado nas seguintes situações:
+      * Colunas que são usadas nas cláusulas ORDER BY e GROUP BY;
+      * Colunas que são frequentemente utilizadas como condições na cláusula WHERE
   
+  - Procedures:
+    * SP_HELPINDEX: Retorna as informações sobre os índices de uma tabela.
+    * SP_SPACEUSED: Retorna as informações sobre o espaço ocupado por uma tabela.
+
+• Tabela HEAP:
+  - Tabela que não possui índice;
+  - Uma tabela HEAP é difícil de exisitir. Normalmente as tabelas possuem PK e FK, ou seja, isso já criaria índices.
+  - Ao fazer uma busca em uma tabela HEAP, é executado o Full scan (table scan), ou seja, uma varredura na tabela para encontrar os registros desejados.
+  - Com o passar do tempo e as operações de inclusão, alteração e exclusão dos registros essas tabelas ficarão com “buracos” espaços.
+
+• Resumo:
+  - A Primary Key (PK) é um índice B-Tree Clustered Index.
+  - A Foreign Key (FK) é um índice B-Tree NonClustered Index
+  - O B, do B-TREE, é de “Balance Tree” porque o índice sempre tentar balancear os lados da árvore.
+
+### Plano de execução
+• Introdução:
+  - Informações precisam ser disponibilizadas de forma eficiente e eficaz, ou seja, com rapidez e qualidade.
+
+• Definição:
+  - Uma maneira simples do Query Optimizer calcular o caminho mais eficiente para implementar uma requisição representada pelo T-SQL, quando esta for submetida dentro SQL Server.
+
+• Modo gráfico
+  - Estimado;
+  - Atual: Necessário executar o script antes que o plano seja gerado;
+  - Deve ser lido da direita para a esquerda;
+
+
+## Backup e Restore
+• Por que fazer BACKUP?
+  • Recuperar seus dados de muitas falhas, como:
+    - Falha de mídia;
+    - Erros de usuário, que removem uma tabela por engano;
+    - Problemas de hardware, disco danificado ou perda permanente de um servidor;
+    - Desastres naturais.
+  • Funções administrativas:
+    - Copiar um BD de um servidor para outro, configurar o espelhamento do BD.
+  
+  • Ter uma estratégia:
+    - Para minimizar a perda de dados;
+    - Para recuperar dados perdidos;
+    - Para restaurar dados com custo mínimo e do impacto;
+  
+  • Banco dados possui 2 ou 3 arquivos físicos;
+    - Dois de dados e o outro de log de transações: os arquivos são:
+      * Para os dados (primários (MDF));
+      * Secundário (NDF) (não obrigatório);
+      * Logs de transação (LDF);
+    
+  • SQL SERVER:
+    - Permite que os backups ocorram enquanto os usuários utilizam o BD.
+    - Realiza o backup dos arquivos originais e grava em arquivos locais.
+    - Salva no backup todas as atividades do BD que ocorrem durante o processo de backup.
+    - O arquivo de backup armazena mais de um backup. Isso é definido na clausula INIT ou NOINIT.
+  
+  • Tipos de backup:
+    - Completo (Full)
+      * Gera cópia total e integral de todo o banco.
+      * É a base para a recuperação de um banco de dados e deve existir antes que você utilize qualquer outro tipo.
+      * Durante a operação de backup full, só existem duas operações que não podem ser realizadas:
+        * adicionar/remover arquivos do banco e reduzir o banco.
+    - Diferencial (Diferential)
+      * Gera cópia dos dados alterados após o último Backup Full;
+      * É acumulativo, ou seja, um backup diferencial feito após outro backup diferencial, contém todas alterações realizadas após o backup Full;
+      * Só pode ser usado quando há um backup full já realizado;
+    - Log de transação ( Transaction Log)
+      * Os arquivos de log de transação contêm as alterações feitas no banco de dados. Ele possui duas partes: a ativa e a inativa.
+        * Ativa: Contêm informações que ainda não foram efetivadas no BD;
+        * Inativa: Contêm as informações que já foram efetivadas.
+      * Captura todas as transações efetivadas no log desde o último backup de log ou backup full;
+      * É ele quem garante a integridade e consistência da base em casos de falha, e também permite através de operações de BACKUP / RESTORE;
+      * Só pode ser usado quando há um backup full;
+    - Grupo de Arquivos (File Group)
+      * Pode-se realizar backup somente de um arquivo ou de um grupo de arquivos. Com isso a operação de backup se torna mais rápida e a restauração também.
+
+  • Backup Completo - Etapas:
+    - Backup Full + Differential + Logs
+  
+  • Restore do Log de Transações:
+    - Deve haver um backup Full precedente aos backups de logs, e que TODOS os arquivos de backups de log sejam restaurados na sequência desde o Full;
+    - A sequência lógica é restaurar o Backup Full, em seguida o Backup Differential e então todos os Backups de Log na sequência
+
+  • Restore ao Ponto da Falha “Point In Time”:
+    - Executado exatamente igual ao RESTORE do LOG, porém é informado a opção STOPAT na cláusula de RESTORE, que informa onde o RESTORE deve “PARAR”.
+
+
+## Segurança
+### Introdução
+  - De modo simplificado, a segurança no acesso às informações significa que o usuário deve ser capaz de acessar os dados necessários com nível de acesso suficiente (e não mais do que suficiente), para que o usuário realize seu trabalho.
+  - Através do mecanismo de segurança também evitamos que pessoas não-autorizadas tenham acesso aos dados.
+
+  - Com esses elementos podemos controlar o acesso aos bancos de dados da instancia e aos seus objetos.
+    * Logins
+    * Usuários (User Accounts)
+    * Papéis (Roles)
+    * Permissões (Permissions)
+
+ - Controle de Acesso
+  * O primeiro passo para que o usuário possa acessar o servidor SQL Server é estabelecer uma conexão com uma instância do servidor SQL Server.
+  * Esse processo de autenticação pode ser pelo:
+    * Windows Authentication;
+    * Modo mixed / SQL Server Authentication.
+  
+  - Autenticação de usuário
+    * LOGIN: Dá acesso a instância do SQL Server
+    * USUÁRIO: Dá acesso ao banco de dados
+
+    * Observações:
+      * LOGIN e o Usuário podem ou não serem vinculados
+      * Usuário sempre vai ter vinculo com um LOGIN
+    
+  - Roles – Função / Papel:
+    * Pode-se utilizar Roles para simplificar a atribuição de permissões de acesso aos objetos do SQL Server.
+    * São semelhantes ao conceito de grupos de usuários do Windows.
+    * As Roles podem ser:
+      - De servidor: Privilégios administrativos no nível do servidor. São independentes do BD.
+      - Banco de dados: Privilégios administrativos no nível do banco de dados.
+      - Própria: Pode-se criar Roles próprias para melhor gerenciar os usuários
+
+  - Roles de servidor
+    * Dbcreator - Criam e alteram os bancos de dados
+    * Diskadmin - Gerenciam os arquivos do disco
+    * Processadmin - Gerenciam os processos do SQL Server
+    * Securityadmin - Gerenciam e auditam os logins do servidor
+    * Serveradmin - Configuram as definições do servidor
+    * Setupadmin - Instalam a duplicação
+    * Sysadmin - Executam qualquer atividade
+    * (bulkadmin) - Executam a instrução BULK INSERT
+
+  - Roles de Banco de dados
+    * public - Mantém todas as permissões padrão;
+    * db_owner - Executa qualquer atividade de cargo de BD
+    * db_accessadmin - Adiciona ou remove usuários, grupos e cargos do DB
+    * db_ddladmin - Adiciona, modifica ou elimina objetos do BD
+    * db_securityadmin - Atríbuí permissões de objetos e instruções
+    * db_backupoperator - Backup de banco de dados
+    * db_datareader - Lê os dados de qualquer tabela
+    * db_datawriter - Adiciona, altera ou exclui dados de todas as tabelas
+    * db_denydatareader - Não pode ler dados de nenhuma tabela
+    * db_denydatawriter - Não pode alterar dados em nenhuma tabela
+  
+  - Roles - Procedures:
+    * sp_addrole - Adiciona uma nova ROLE
+    * sp_droprole - Exclui uma ROLE
+    * sp_helprole - Fornece informações sobre todas as roles do BD
+    * sp_grantdbaccess - Adicionar um logins à lista de usuários autorizados a acessar um BD
+    * sp_revokedbaccess - retirar a permissão de acesso do usuário a um Banco de Dados
+    * sp_addsvrrolemember - adicionar um usuário a uma role de servidor
+    * sp_dropsvrrolemember - excluir um usuário de uma role do servidor
+    * sp_addrolemember - adicionar um usuário a uma role de Banco de Dados
+    * sp_droprolemember - Para excluir um usuário de uma role de Banco de Dados
+  
+  - Permissões - DCL – Linguagem de controle de dados:
+    * Controlar o acesso dos usuários aos objetos de um banco de dados ou servidor;
+    * Previlégios: Connect, create, select, insert, update, delete, execute
+    * Podem ser: por usuário ou por objeto;
+    * Comandos:
+      * GRANT: Concede permissão para executar a tarefa relacionada;
+      * DENY: Nega permissão para executar tarefas;
+      * REVOKE: remove a permissão.
+  
+
+## Stored Procedure
+  • Características:
+    - Biblioteca de comandos em SQL para utilização junto ao BD;
+    - Armazena tarefas repetitivas;
+    - Pode conter parâmetros de entrada e de saída, instruções de comparação (if), loops (while) operadores, variáveis, funcões, etc;
+    - São basicamente blocos de instruções SQL compiladas num único plano de execução;
+    - Podem ser chamadas por outra SP ou por aplicativos Java, PHP, ASP, Delphi, VB, etc;
+
+  • Quando utilizar:
+    - Várias aplicações escritas em diferentes linguagens, ou que rodam em plataformas diferentes, porém executam a mesma função;
+    - Prioridade à consistência e segurança dos dados armazenados no BD.
+  
+  • Vantagens:
+    - Facilita a manutenção e a alteração das aplicações;
+    - Ocultar a complexidade de acesso ao BD;
+    - Recebe parâmetros de entrada e retorna resultados;
+    - Reduz o tráfego de rede gerado pela aplicação;
+    - Facilita e centraliza o gerenciamento de permissões;
+    - Melhora a velocidade de execução.
+  
+  • Segurança:
+    - Aplicações e usuários não tem nenhum tipo de acesso às tabelas do BD;
+    - Os usuários podem apenas executar as SP;
+    - Executam ações específicas e determinadas pelos DBAs e desenvolvedores.
+  
+  • Regras:
+    - Usar transações, para poder ‘voltar’ os dados em caso de problemas;
+    - Retornar somente os dados necessário, evitando tráfego na rede desnecessário;
+    - Usar identação;
+    - Comentar o código;
+  
+  • Tipos:
+    - Temporary: criadas pelo SQL-Server, Manutenção e gerenciamento de conexões.
+    - System: manutenção e gerenciamento (sp_);
+    - Extended: funções externas, ligadas ao SO, Extensão (xp_);
+    - User-defined: Criadas pelos usuários.
+  
+  • Algumas procedures do SQL Server:
+    - SP_STORED_PROCEDURES: Retorna uma lista das SPs existentes no BD;
+    - SP_HELP: Mostra informações sobre qualquer objeto do BD;
+    - SP_HELPTEXT: Mostra os comandos de uma SP;
+    - SP_DATABASES: retorna informações sobre os bancos de dados;
+    - SP_TABLES: informações sobre tabelas;
+    - SP_COLUMNS nome_do_objeto: retorna informações sobre as colunas de um objeto;
+    - SP_HELPINDEX nome_do_objeto: informações sobre os índices de um objeto.
+  
+
+## Triggers
+• Conjunto de instruções SQL, que é executado automaticamente em consequência de uma ação (INSERT, UPDATE, DELETE) sobre uma tabela;
+• Sua execução está associada a uma tabela;
+• As ações de uma trigger podem ser sobre qualquer tabela da base de dados;
+
+• Pode-se definir “Regras de Negócio” do BD;
+• Pode-se usar TRIGGERS para exclusão e atualização em cascata;
+• Se o comando que está sendo executado violar a definição de uma CONSTRAINT definida, a TRIGGER não irá disparar.
+
+• Tipos:
+  - AFTER / FOR;
+    * Disparada quando as operações especificadas no comando de disparo forem executadas com sucesso;
+    * As CONSTRAINTS devem ter sido bem sucedidas antes da trigger ser executada.
+    * É o tipo padrão;
+  - INSTEAD OF.
+    * Disparada ANTES dos comandos serem executados;
+    * Processa as CONSTRAINTS antes da execução da trigger;
+    * Para alteração em cascata devemos usar a trigger “instead of”.
+
+• TRIGGER tem acesso a duas tabelas especiais:
+  - DELETED TABLE e INSERTED TABLE;
+  - Essas tabelas existem apenas na memória do servidor, não sendo gravadas em disco;
+  - Os registros dessas tabelas são acessíveis somente durante a execução da TRIGGER.
+
+• DELETED
+  - Armazena cópias de registros afetados por um comando DELETE ou UPDATE;
+  - Armazena os registros antes da alteração;
+• INSERTED:
+  - Armazena cópias dos registros afetados por um comando INSERT ou UPDATE;
+  - Armazena os registros depois da alteração.
+
+• Para desabilitar temporariamente uma trigger:
+  - alter table nomeTabela
+  - disable trigger nomeTabela
+
