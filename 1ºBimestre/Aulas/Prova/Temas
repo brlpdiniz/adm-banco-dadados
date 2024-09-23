@@ -14,3 +14,279 @@
 ### Índices
 - Índices - Qual a diferença entre eles?
 
+
+## Subconsulta
+### TIPOS DE SUBCONSULTA - SUBQUERY
+• Com uma linha
+  - São comandos SELECT aninhados em outros comandos SELECT, INSERT, UPDATE ou DELETE ou outras SUB-CONSULTAS
+  - Muitas sentenças SQL que incluem SUBQUERIES podem ser formuladas de modo alternativo através de JOINS
+• Operador any / some
+• Operador in
+• No having
+• Correlacionada
+• Com operador exists
+  - Retorna VERDADEIRO ou FALSO;
+  - É um operador que tem como argumento um SELECT;
+  - A SUBQUERY não devolve nenhuma tabela resultante;
+  - EXISTS pode ser negado por um NOT;
+  - Intersect (interseção)
+• Except (diferença)
+• Divisão
+
+### UNION e UNION ALL
+• Consultar informações pertencentes a mais de uma tabela e que são obtidas com a execução de mais de um comando SELECT;
+• Regras:
+  - As colunas devem ser do mesmo tipo, ou seja, (string com string, int com int…);
+  - É necessário que os comandos SELECT apresentem o mesmo número de colunas;
+  - Elimina linhas duplicadas do resultado.
+  - A inclusão de WHERE pode ser feita em qualquer um dos comandos SELECT;
+  - O apelido (alias) das colunas, quando necessário, deve ser incluído no primeiro SELECT;
+  - Para dados ordenados, o último SELECT deve ter uma cláusula ORDER BY;
+  - UNION ALL: não elimina as linhas duplicadas.
+
+
+## Tabelas Temporárias e Variáveis de Tabela
+### TABELAS TEMPORÁRIAS:
+  • São utilizadas com maior frequência para armazenar resultados intermediários no processamento de dados.
+  • Normalmente utilizadas dentro de procedures.
+  • Tipos:
+    - Tabelas temporárias:
+      * Locais
+        - Fica acessível apenas para o usuário e na conexão em que ela foi criada;
+        - Para identificar um tabela temporária local, utiliza-se o símbolo #
+      * Globais
+        - Para identificar um tabela temporária global, utiliza-se dois símbolos ##;
+        - É visualizada por todas as conexões ativas.
+    - Variáveis de Tabela;
+  
+  • Caraterísticas
+    - Existirá somente enquanto a conexão estiver ativa;
+    - Ao encerrar a conexão a tabela é automaticamente eliminada;
+    - Não é criada na base de produção. É criada no banco TEMPDB;
+    - Sua utilização é idêntica a uma tabela normal;
+  
+### VARIÁVEIS DE TABELA:
+  • São uma opção para armazenamento temporário de dados, em substituição às tabelas temporárias.
+  • Vantagens:
+    - Não consomem recursos para controle de bloqueios. São estritamente locais.
+    - A manipulação de dados é mais eficiente porque essas operações são minimamente logadas (Transação).
+    - Procedures que utilizam de variáveis tipo TABLE tem um número menor de recompilações quando comparadas às tabelas temporárias.
+  • Desvantagens:
+    - A vida útil está limitada ao procedimento onde esta sendo utilizada.
+    - Com variáveis tipo TABLE não é permitido:
+      * Criação de índices não-cluster, constraints CHECK, DEFAULT;
+      * Criação e/ou atualização de estatísticas;
+      * Alteração da estrutura da tabela;
+      * Não pode ser o destino de INSERT EXEC ou SELECT INTO;
+    - Exemplo:
+    ```
+    declare @exemplo table (
+      id int,
+      name varchar(32)
+    );
+    ```
+
+### Diferenças entre Tabelas Temporárias e Variáveis de Tabela:
+• Tabelas temporárias:
+  - Gravadas fisicamente (TEMPDB);
+  - Permite utilizar índices;
+  - São visíveis apenas enquanto a conexão está ativa.
+
+• Variáveis de tabela:
+  - Armazenadas em memória;
+  - Utiliza menos recursos com bloqueio;
+  - As operações são minimamente logadas;
+  - Gera menos recompilação;
+
+• PERFORMANCE:
+  - Tabela temporária trabalha melhor com uma grande massa de dados;
+  - Variável do tipo TABLE tem uma performance melhor com uma pequena quantidade de registros.
+
+
+## Transação
+• Uma sequência de operações que são tratadas como um bloco único e indivisível (atômico) no que se refere à sua execução.
+• Todas as operações contidas na transação devem ser finalizadas com sucesso ou nenhuma delas deve ser realizada;
+  
+• Princípo:
+  - “Ou você tem todos os seus dados íntegros e consistentes no seu banco ou não tem dado algum”.
+  
+• Término::
+  - COMMIT: Termina com sucesso uma transação.
+  - ROLLBACK: Termina indicando que houve um erro.
+
+• Tipos:
+  - IMPLÍCITAS: Ocorrem automaticamente quando enviamos os comandos INSERT, UPDATE e DELETE;
+  - EXPLÍCITAS: Segue o conceito formal de transações onde deve-se indicar o início e o término da mesma;
+
+• Propriedaes - ACID:
+  - Atomicidade
+    * A transação deve representar uma unidade de trabalho INDIVISÍVEL
+    * Garante que todas as operações na transação serão executadas ou nenhuma será
+    * Isto evita que falhas ocorridas, possam deixar a base de dados inconsistente;
+  - Consistência
+    * Ao final da transação, todos os dados devem estar em um estado consistente em um BD relacional;
+    * Estado consistente, significa que todas as regras e a integridade referencial tenha sido respeitada;
+    * As ações não devem violar as restrições de integridade do BD;
+  - Isolamento
+    * Significa que, mesmo no caso de transações executadas concorrentemente, o resultado final é igual ao obtido com a execução isolada de cada uma delas;
+    * Garante que uma determinada transação não usará dados em um estado intermediário;
+  - Durabilidade
+    * Uma vez encerrada a transação, as alterações por ela efetuadas serão definitivas;
+    * Significa que os resultados de uma transação, caso ela seja concluída com sucesso, devem ser persistentes. Mesmo se depois houver uma falha no sistema;
+
+• Variáveis
+  - @@ERROR Valor 0 (zero) caso não ocorra nem um erro , no caso de algum erro valor 1 (um).
+  - @@TRANCOUNT Retorna o número de transações ativas;
+
+• Funções
+  - RAISERROR() Permite enviar uma mensagem de erro facilitando na hora de algum suporte.
+  - ERROR_NUMBER() Retorna o número do erro;
+  - ERROR_MESSAGE() Exibe a mensagem do erro;
+  - ERROR_SEVERITY() Retorna o grau de severidade do erro;
+  - ERROR_LINE() Retorna a linha em que o erro ocorreu;
+
+• Comandos
+  - Begin transaction
+  - Commit transaction
+  - Rollback transaction [ savepoint ]
+  - Save transaction
+
+  - A partir da versão 2005, o SQL Server, permite implementar o tratamento de erros através do bloco TRY-CATCH;
+    * Quando um erro ocorre no dentro do bloco TRY a execução é desviada para o bloco
+    * CATCH, o que permite continuar a execução do script ou interrompê-lo;
+    * Este bloco é formado por dois sub-blocos:
+    * TRY: Comandos necessários para executar a tarefa desejada;
+    * CATCH: Comandos para tratamento de possíveis erros ocorridos no bloco TRY;
+
+• Savepoint:
+  - Define o local para o qual a transação deve retornar se parte da transação é condicionalmente cancelada.
+  - Exemplo:
+    * Se na transação for utilizado um SAVEPOINT, e a mesma for cancelada (ROLLBACK), a primeira parte da transação, até o SAVEPOINT, não será desfeita;
+
+
+## VIEW
+• É qualquer relação que não faz parte do modelo lógico do banco de dados, mas que é visível ao usuário, como uma relação virtual;
+• O SGBD armazena sua definição ao invés do resultado da expressão SQL que a definiu;
+• Alternativa de observação de dados de uma ou mais tabelas, que compõem uma base de dados.
+
+• Características:
+  - Sempre que a relação visão é usada, ela é sobreposta pela expressão da consulta armazenada;
+  -  Pode ser considerada como uma tabela virtual ou uma consulta armazenada.
+  -  Implementa de maneira encapsulada uma instrução SELECT;
+  -  Podem ser implementadas também com algumas aplicações de restrição.
+
+• Benefícios:
+  - Mecanismo de segurança, pois pode restringir o acesso aos dados;
+  - Pode restringir quais as colunas da tabela, podem ser acessadas;
+  - Consulta SELECT, usada frequentemente pode tornar-se uma visão;
+
+• Limitações:
+  - Referenciar tabelas temporárias, variáveis ou outros tipos;
+  - Conter a cláusula ORDER BY ao menos que especifique o operador TOP;
+
+• Exemplo:
+  ```
+    create view mostraLivros as
+    select titulo, preco_venda from livro
+  ```
+
+
+## Funções - UDF (Funções Definidas pelo Usuário)
+• Não fazem parte do conjunto de funções do SQL Server;
+• Podem retornar valores comuns ou mesmo um valor no formato de uma tabela, com múltiplas ocorrências;
+• Erros encontrados em instruções Transact-SQL interrompem seu processamento.
+
+• Comandos de definição:
+  - CREATE FUNCTION para criar a UDF
+  - ALTER FUNCTION para alterar a função
+  - DROP FUNCTION: Para remover as funções UDF
+
+• Tipos:
+  - Scalar valued functions;
+    * Retorna um único valor;
+    * Utiliza-se a instrução RETURN com um argumento;
+    * O tipo de retorno, pode ser qualquer um dos tipos de dados conhecidos como scalar_data_types do SQL Server exceto: timestamp, text, ntext, or image.
+    * Nas chamadas às funções do tipo scalar, deve-se utilizar:
+      * 1º) nomeUsuário.nomeFunção
+      * 2º) nomeBanco.nomeUsuário.NomeFunção
+
+  - Inline table valued functions;
+    * Possui cláusula RETURNS seguida da palavra TABLE sem uma lista de colunas;
+    * Retornam valores apresentados como se extraídos de tabelas e são definidas com uma única instrução SELECT em sua construção;
+    * As colunas, incluindo os tipos de dados retornados pela função, são derivados da lista da instrução SELECT que define a função;
+    * Não requer BEGIN, END na criação do seu corpo.
+    * Como chamar:
+      * select * from dbo.clientesCidade(1);
+
+  - Multi-statement table valued functions.
+    * Utilizada para lógicas mais complexas que costumam conter condicional;
+    * Retorna uma tabela;
+    * Pode-se definir chave primária, identity, etc, no retorno da tabela;
+
+### Boas práticas em performance:
+  - Usar scalar functions complexas em resultados pequenos;
+  - Usar Multi-statement functions ao invés de stored procedures para retornar tabelas;
+  - Usar In-line functions para criar views parametrizadas;
+  - Usar In-line functions para filtrar views indexadas.
+
+
+## Cursores
+- Ao executamos um comando SELECT, UPDATE ou DELETE em uma tabela do banco de dados, são acessados vários registros de uma só vez;
+- O número de registros retornados depende do tamanho da tabela e da forma com que são buscados em conjunto com a cláusula WHERE, que realiza uma filtragem nos dados selecionados.
+- As operações com conjuntos de linhas é uma das características que define um banco de dados relacional;
+- Um conjunto pode ser vazio ou poderá conter uma única linha, mas ainda assim será um conjunto;
+- Existem situações em que trazer os registros de uma só vez não é conveniente ou possível para realizar certos tipos de operações, onde é necessário obter resultado de cada linha uma a uma;
+- Nestes casos os SGBD’s fornecem um recurso bastante interessante chamado CURSOR.
+
+- É uma instrução SELECT que será acessada linha a linha através de um laço WHILE e alguns comandos específicos para cursores;
+- Utilizado normalmente em procedimentos armazenados;
+- Permitem a realização de operações sobre linhas individuais de umresultado.
+- Podem executar operações como: atualizar, excluir ou mover dados;
+- São criados usando o comando DECLARE CURSOR;
+
+- Algumas Características dos cursores:
+  * Capacidade de refletir alterações em dados subjacentes;
+  * Capacidade de rolar pelo conjunto de linhas;
+  * Capacidade de atualizar o conjunto de linhas.
+
+- O conjunto de linhas para o qual um cursor aponta é definido pelo comando SELECT.;
+- Algumas restrições SELECT ao se criar um cursor T-SQL:
+  * Não poderá retornar vários conjuntos de linhas;
+  * Não poderá conter a cláusula INTO para criar uma nova tabela;
+  * Não poderá conter a cláusulas COMPUTE ou COMPUTE BY;
+  * Poderá conter funções agregadas, tais como AVG.
+
+- Etapas para utilização do cursor:
+  * 1) Declaração do cursor;
+  * 2) Abertura do cursor;
+  * 3) Execução do cursor;
+  * 4) Fechamento do cursor;
+  * 5) Dessalocar o cursor.
+
+- Opções da declaração do cursor:
+  * LOCAL: O escopo do cursor é local;
+  * GLOBAL: O escopo do cursor é global para a conexão;
+  * FORWARD_ONLY: Só pode ser rolado da primeira à última linha.
+      * FETCH NEXT é a única opção de busca com suporte.
+  * o SCROLL: Todas as operações de movimentação poderão ser realizadas. Especifica que todas as opções de busca (FIRST, LAST, PRIOR, NEXT, RELATIVE, ABSOLUTE).
+ 
+### FETCH - Leitura das linhas de cursor:
+- Realiza a movimentação em um cursor, permitindo percorrê-lo linha a linha.
+  * NEXT: move para a próxima linha do cursor ou para a primeira;
+  * PRIOR: move para a linha anterior;
+  * FIRST: move para a primeira linha;
+  * LAST: move para última linha;
+  * ABSOLUTE n: move para a linha de posição n no cursor (se for positivo, a contagem inicia na primeira linha, se negativo, na última);
+  * RELATIVE n: move para n linhas para frente ou para trás.
+
+  * INTO @variavel1[, @variavel2…]: permite associar cada coluna do cursor a uma variável declarada;
+  * o Cada variável listada no comando FETCH deverá estar relacionada a uma coluna do cursor;
+  * o A variável deve possuir o mesmo tipo da coluna, não sendo realizadas conversões implícitas.
+
+  * Para ler todo o cursor, ou seja, todas as linhas que estão armazenadas utiliza-se o comando WHILE;
+  * A variável @@FETCH_STATUS retorna informações sobre o último comando FETCH que foi lançado:
+    * 0: O FETCH foi realizado com sucesso;
+    * -1: O FETCH falhou;
+    * -2: O registro trazido foi perdido.
+  
+  
