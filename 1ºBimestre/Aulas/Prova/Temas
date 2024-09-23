@@ -4,7 +4,7 @@
 - Características
 
 ### Qual a diferença entre login e usuário?
-- Login - Dá acesso ao servidor
+- Login - Dá acesso ao servidor (instância)
 - Usuário - Dá acesso ao banco de dados
 
 ### Backup
@@ -13,7 +13,11 @@
 
 ### Índices
 - Índices - Qual a diferença entre eles?
-
+- Clustered
+  * O índice clusterizado é quase um sinônimo de chave primária. De fato só pode usar um por tabela e tem que ser na ordem da inserção dos dados, o que obviamente exclui chaves primárias naturais. Em um índice assim a chave é a posição onde o dado está. Na verdade ele é a própria tabela.
+- NonClustered
+  * O índice não clusterizado são todos os outros índices onde você terá uma chave qualquer e um apontador para a tabela de dados. Então há sempre duas pesquisas, uma no índice non-cluster e depois sabendo qual a posição dele buscará o dado de fato na tabela, que até pode ser um índice clusterizado.
+- Enquanto os índices clusterizados ordenam fisicamente tanto as linhas da tabela quanto os próprios índices e mantêm os mesmos próximos uns aos outros; os não-clusterizados ordenam somente o índice em si, e não as linhas (que são salvas sempre de forma aleatória no disco).
 
 ## Subconsulta
 ### TIPOS DE SUBCONSULTA - SUBQUERY
@@ -171,9 +175,9 @@
 
 • Características:
   - Sempre que a relação visão é usada, ela é sobreposta pela expressão da consulta armazenada;
-  -  Pode ser considerada como uma tabela virtual ou uma consulta armazenada.
-  -  Implementa de maneira encapsulada uma instrução SELECT;
-  -  Podem ser implementadas também com algumas aplicações de restrição.
+  - Pode ser considerada como uma tabela virtual ou uma consulta armazenada.
+  - Implementa de maneira encapsulada uma instrução SELECT;
+  - Podem ser implementadas também com algumas aplicações de restrição.
 
 • Benefícios:
   - Mecanismo de segurança, pois pode restringir o acesso aos dados;
@@ -225,9 +229,9 @@
 
 ### Boas práticas em performance:
   - Usar scalar functions complexas em resultados pequenos;
-  - Usar Multi-statement functions ao invés de stored procedures para retornar tabelas;
   - Usar In-line functions para criar views parametrizadas;
   - Usar In-line functions para filtrar views indexadas.
+  - Usar Multi-statement functions ao invés de stored procedures para retornar tabelas;
 
 
 ## Cursores
@@ -240,7 +244,7 @@
 
 - É uma instrução SELECT que será acessada linha a linha através de um laço WHILE e alguns comandos específicos para cursores;
 - Utilizado normalmente em procedimentos armazenados;
-- Permitem a realização de operações sobre linhas individuais de umresultado.
+- Permitem a realização de operações sobre linhas individuais de um resultado.
 - Podem executar operações como: atualizar, excluir ou mover dados;
 - São criados usando o comando DECLARE CURSOR;
 
@@ -280,12 +284,12 @@
   * RELATIVE n: move para n linhas para frente ou para trás.
 
   * INTO @variavel1[, @variavel2…]: permite associar cada coluna do cursor a uma variável declarada;
-  * o Cada variável listada no comando FETCH deverá estar relacionada a uma coluna do cursor;
-  * o A variável deve possuir o mesmo tipo da coluna, não sendo realizadas conversões implícitas.
+  * Cada variável listada no comando FETCH deverá estar relacionada a uma coluna do cursor;
+  * A variável deve possuir o mesmo tipo da coluna, não sendo realizadas conversões implícitas.
 
   * Para ler todo o cursor, ou seja, todas as linhas que estão armazenadas utiliza-se o comando WHILE;
   * A variável @@FETCH_STATUS retorna informações sobre o último comando FETCH que foi lançado:
-    * 0: O FETCH foi realizado com sucesso;
+    *  0: O FETCH foi realizado com sucesso;
     * -1: O FETCH falhou;
     * -2: O registro trazido foi perdido.
   
