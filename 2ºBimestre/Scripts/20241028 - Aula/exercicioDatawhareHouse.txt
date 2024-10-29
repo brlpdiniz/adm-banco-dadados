@@ -1,0 +1,41 @@
+Infos sobre o perfil do cliente
+- Faixa etária (jovem?)
+- Cidade
+- Quantidade de clientes (total)
+- Dia da semana que tem mais clientes?
+- Abre todos os dias
+- Mês que tem mais movimento
+ 
+tabela tempo / calendário:
+- data
+- dia
+- mes
+- ano
+- dia da semana
+	- (domingo = 1)
+ 
+tabela cidade:
+- id
+- nome da cidade (referente a loja)
+ 
+tabela faixa etária:
+- id
+- descrição
+(
+	- até 20 anos
+		- grupo 1	
+	- 21 - 30
+		- grupo 2 
+	- 31 - 50
+		- grupo 3
+	- 51 - 70
+		- grupo 4
+	- > 70
+		- grupo 5
+)
+ 
+tabela fato:
+- id_cidade
+- id_tempo
+- id_faixaEtaria
+- quantidade
