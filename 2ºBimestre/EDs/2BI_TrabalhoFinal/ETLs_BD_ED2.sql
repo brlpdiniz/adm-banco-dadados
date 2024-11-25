@@ -1,10 +1,24 @@
 /*
-		DEBUG
+		----- DEBUG -----
+
 	select * from dim_categoria
-	select * from dim_tempo
+	select * from dim_tempo order by data DESC
 	select * from dim_loja
 	select * from fato_vendas
-	declare @data_corte date = '2024-12-10' 
+	declare @data_corte date = '2024-12-10'
+
+    select * from food.dbo.Pedido
+    select * from food.dbo.PedidoProduto
+    select * from food.dbo.Produto
+    select * from food.dbo.Loja
+    select * from food.dbo.CategoriaProduto
+
+	insert into food.dbo.Pedido (ped_data, sit_id, loj_id, cli_id, Fun_id, Ent_id, fpg_id, tip_id)
+	values
+	('2026-12-11', 1, 2, 1, 1, 1, 1, 1),
+	('2026-12-12', 2, 3, 2, 2, 2, 2, 2),
+	('2026-12-13', 3, 4, 3, 3, 3, 3, 3);
+
 */
 
 -- Criacao do banco Data Warehouse
@@ -72,7 +86,7 @@ from food.dbo.categoriaProduto;
 -- Tempo
 insert into dim_tempo (data, dia_semana, dia, mes, bimestre, trimestre, ano)
 select 
-    distinct ped_data as data,
+    ped_data as data,
     datename(weekday, ped_data) as dia_semana,
     day(ped_data) as dia,
     month(ped_data) as mes,
@@ -96,19 +110,51 @@ join food.dbo.regiao r on e.reg_id = r.reg_id;
 -- Fato Vendas
 insert into fato_vendas (data_id, loja_id, categoria_id, valor_total)
 select 
-    t.tempo_id,
-    l.loja_id,
-    p.cat_id,
-    sum(pp.pdd_preco * pp.pdd_quantidade) as valor_total
-from 
-    food.dbo.pedido ped
-join food.dbo.pedidoProduto pp on ped.ped_id = pp.ped_id
-join food.dbo.produto p on pp.pro_id = p.pro_id
-join dim_tempo t on t.data = ped.ped_data
-join dim_loja l on l.loja_id = ped.loj_id
+    isnull(t.tempo_id, 0) as data_id,
+    isnull(l.loja_id, 0) as loja_id,
+    c.cat_id,
+    coalesce(sum(pp.pdd_preco * pp.pdd_quantidade), 0) as valor_total
+from food.dbo.produto p
+left join food.dbo.pedidoProduto pp on pp.pro_id = p.pro_id
+left join food.dbo.pedido ped on ped.ped_id = pp.ped_id
+left join dim_tempo t on t.data = ped.ped_data
+left join dim_loja l on l.loja_id = ped.loj_id
+right join dim_categoria c on c.cat_id = p.cat_id
+where t.tempo_id is not null -- Garante que o tempo existe
+  and l.loja_id is not null -- Garante que a loja existe
 group by 
-    t.tempo_id, l.loja_id, p.cat_id;
+    t.tempo_id, l.loja_id, c.cat_id;
 
+
+/*
+	Existem categorias sem produto registrado no banco food...
+	Por isso, algumas categorias não aparecem nos gráficos (fiquei 3h me batendo com isso rsrs)
+	Para mostrá-las no DW_food, o professor pode executar o código abaixo e assim, será possível vê-las no gráfico do BI (mesmo que zeradas)
+	Motivo:
+		"Mostrar o Top 10 das categorias de prato mais vendidas"
+	Caso não precise aparecer as categorias zeradas, não precisa rodar o código abaixo:
+*/
+
+/*
+	insert into fato_vendas (data_id, loja_id, categoria_id, valor_total)
+	select 
+		t.tempo_id,
+		l.loja_id,
+		c.cat_id,
+		0 as valor_total
+	from dim_tempo t
+	cross join dim_loja l
+	cross join dim_categoria c
+	where not exists (
+		select 1
+		from fato_vendas fv
+		where fv.data_id = t.tempo_id
+		  and fv.loja_id = l.loja_id
+		  and fv.categoria_id = c.cat_id
+	);
+*/
+
+------------------------------------------------------------------------
 
 /*
 	Carga Incremental -> Atualizando as tabelas do DW (dim e fato)
@@ -119,7 +165,7 @@ declare @data_corte date = '2024-12-10'
 -- Tempo
 insert into dim_tempo (data, dia_semana, dia, mes, bimestre, trimestre, ano)
 select 
-    distinct ped_data as data,
+    ped_data as data,
     datename(weekday, ped_data) as dia_semana,
     day(ped_data) as dia,
     month(ped_data) as mes,
@@ -128,7 +174,6 @@ select
     year(ped_data) as ano
 from food.dbo.pedido
 where ped_data > @data_corte
-    -- Exclui datas já existentes
     and not exists (
         select 1
         from dim_tempo dt
@@ -149,8 +194,7 @@ join food.dbo.produto p on pp.pro_id = p.pro_id
 join dim_tempo t on t.data = ped.ped_data
 join dim_loja l on l.loja_id = ped.loj_id
 where 
-    ped.ped_data > @data_corte
-    -- Exclui registros já existentes
+    ped.ped_data > @data_corte  -- Após 2024-12-10
     and not exists (
         select 1
         from fato_vendas fv
@@ -161,4 +205,3 @@ where
     )
 group by 
     t.tempo_id, l.loja_id, p.cat_id;
-		select * from fato_vendas
