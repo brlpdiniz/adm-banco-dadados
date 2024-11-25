@@ -19,6 +19,13 @@
 	('2026-12-12', 2, 3, 2, 2, 2, 2, 2),
 	('2026-12-13', 3, 4, 3, 3, 3, 3, 3);
 
+	exec sp_CargaInicial
+	go
+
+	declare @data_corte date = '2024-12-10'
+	exec sp_CargaIncremental @data_corte
+	go
+
 */
 
 -- Criacao do banco Data Warehouse
@@ -77,6 +84,10 @@ create table fato_vendas (
 /*
 	Carga Inicial -> Populando as tabelas do DW (dim e fato)
 */
+go
+create procedure sp_CargaInicial
+as
+begin
 
 -- Categoria
 insert into dim_categoria (cat_id, cat_descricao)
@@ -124,10 +135,11 @@ where t.tempo_id is not null -- Garante que o tempo existe
   and l.loja_id is not null -- Garante que a loja existe
 group by 
     t.tempo_id, l.loja_id, c.cat_id;
-
+end;
+go
 
 /*
-	Existem categorias sem produto registrado no banco food...
+	Existem categorias sem produto registrado no banco food, valor_total = 0...
 	Por isso, algumas categorias não aparecem nos gráficos (fiquei 3h me batendo com isso rsrs)
 	Para mostrá-las no DW_food, o professor pode executar o código abaixo e assim, será possível vê-las no gráfico do BI (mesmo que zeradas)
 	Motivo:
@@ -160,7 +172,10 @@ group by
 	Carga Incremental -> Atualizando as tabelas do DW (dim e fato)
 */
 
-declare @data_corte date = '2024-12-10'
+create procedure sp_CargaIncremental
+    @data_corte DATE
+as
+begin
 
 -- Tempo
 insert into dim_tempo (data, dia_semana, dia, mes, bimestre, trimestre, ano)
@@ -205,3 +220,12 @@ where
     )
 group by 
     t.tempo_id, l.loja_id, p.cat_id;
+end;
+go
+
+exec sp_CargaInicial
+go
+
+declare @data_corte date = '2024-12-10'
+exec sp_CargaIncremental @data_corte
+go
