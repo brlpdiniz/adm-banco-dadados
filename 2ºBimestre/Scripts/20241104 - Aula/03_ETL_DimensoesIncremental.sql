@@ -1,11 +1,11 @@
--- Carga das tabelas dimensões
+-- Carga das tabelas dimensï¿½es
 use dw_aula;
 go
 
--- ETL Dimensões
--- Carga da faixa etária.
+-- ETL Dimensï¿½es
+-- Carga da faixa etï¿½ria.
 	insert into dim_FaixaEtaria 
-	values (1, 'até 20 anos'),
+	values (1, 'atï¿½ 20 anos'),
 	(2, '21 anos a 30 anos'),
 	(3, '31 anos a 50 anos'),
 	(4, '51 anos a 70 anos'),

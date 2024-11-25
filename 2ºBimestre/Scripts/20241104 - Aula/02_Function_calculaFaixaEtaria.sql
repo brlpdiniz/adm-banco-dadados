@@ -17,7 +17,7 @@ begin
 			when @idade > 30 and @idade < 51 Then 3
 			when @idade > 50 and @idade < 71 Then 4
 			else 5
-		end as feixaEtaria)
+		end as faixaEtaria)
 	return @faixa
 end
 
